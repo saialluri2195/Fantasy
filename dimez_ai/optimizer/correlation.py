@@ -7,7 +7,7 @@ from typing import Dict, List
 
 import numpy as np
 
-logger = logging.getLogger("hike_v2.optimizer.correlation")
+logger = logging.getLogger("dimez_ai.optimizer.correlation")
 
 # Same-game correlation estimates (based on historical analysis)
 # Same-direction legs (e.g., QB over pass yards + WR over rec yards) are positively correlated

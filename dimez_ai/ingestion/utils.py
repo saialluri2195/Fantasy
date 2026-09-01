@@ -13,7 +13,7 @@ from typing import Optional
 
 import pandas as pd
 
-logger = logging.getLogger("hike_v2.ingestion")
+logger = logging.getLogger("dimez_ai.ingestion")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",

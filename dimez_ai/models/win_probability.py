@@ -18,7 +18,7 @@ from config import MODEL_ARTIFACTS_DIR
 from features.builder import get_feature_columns
 from models.calibration import CalibratedModel, brier_score
 
-logger = logging.getLogger("hike_v2.models.win_probability")
+logger = logging.getLogger("dimez_ai.models.win_probability")
 
 
 class WinProbabilityModel:

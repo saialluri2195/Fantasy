@@ -15,7 +15,7 @@ from models.projection import ProjectionModel, train_projection_models
 from models.win_probability import WinProbabilityModel, create_prop_labels
 from features.builder import build_feature_table, build_all_position_features
 
-logger = logging.getLogger("hike_v2.models.retrain")
+logger = logging.getLogger("dimez_ai.models.retrain")
 
 
 def retrain_projection_models(

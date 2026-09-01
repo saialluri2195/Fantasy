@@ -13,7 +13,7 @@ Odds and probabilities are estimates, not guarantees. Betting involves risk and 
 ## Installation
 
 ```powershell
-cd hike_v2
+cd dimez_ai
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt

@@ -34,7 +34,7 @@ from backtest.baselines import (
     market_implied_probability_baseline,
 )
 
-logger = logging.getLogger("hike_v2.backtest.walk_forward")
+logger = logging.getLogger("dimez_ai.backtest.walk_forward")
 
 
 def run_walk_forward_backtest(

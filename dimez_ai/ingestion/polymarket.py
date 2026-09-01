@@ -24,7 +24,7 @@ from ingestion.utils import (
     version_path,
 )
 
-logger = logging.getLogger("hike_v2.ingestion.polymarket")
+logger = logging.getLogger("dimez_ai.ingestion.polymarket")
 
 
 def _gamma_request(endpoint: str, params: dict = None) -> list:

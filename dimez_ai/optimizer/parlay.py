@@ -14,7 +14,7 @@ from config import RESPONSIBLE_GAMBLING_NOTE, POLYMARKET_GAMMA_API_URL
 from models.win_probability import WinProbabilityModel
 from optimizer.correlation import adjust_parlay_probability
 
-logger = logging.getLogger("hike_v2.optimizer.parlay")
+logger = logging.getLogger("dimez_ai.optimizer.parlay")
 
 
 class ParlayValueFinder:

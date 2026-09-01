@@ -12,7 +12,7 @@ from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 
-logger = logging.getLogger("hike_v2.models.calibration")
+logger = logging.getLogger("dimez_ai.models.calibration")
 
 
 class CalibratedModel:
