@@ -1,0 +1,18 @@
+[
+  {"id":"game-buf-kc","commence_time":"2026-09-10T00:20:00Z","home_team":"Kansas City Chiefs","away_team":"Buffalo Bills","bookmakers":[
+    {"key":"draftkings","title":"DraftKings","markets":[{"key":"h2h","outcomes":[{"name":"Kansas City Chiefs","price":130},{"name":"Buffalo Bills","price":-150}]},{"key":"totals","outcomes":[{"name":"Over","price":115,"point":48.5},{"name":"Under","price":-125,"point":48.5}]}]},
+    {"key":"fanduel","title":"FanDuel","markets":[{"key":"h2h","outcomes":[{"name":"Kansas City Chiefs","price":100},{"name":"Buffalo Bills","price":-120}]},{"key":"totals","outcomes":[{"name":"Over","price":-105,"point":48.5},{"name":"Under","price":-105,"point":48.5}]}]},
+    {"key":"betmgm","title":"BetMGM","markets":[{"key":"h2h","outcomes":[{"name":"Kansas City Chiefs","price":105},{"name":"Buffalo Bills","price":-125}]},{"key":"totals","outcomes":[{"name":"Over","price":-110,"point":48.5},{"name":"Under","price":100,"point":48.5}]}]}]},
+  {"id":"game-det-min","commence_time":"2026-09-13T17:00:00Z","home_team":"Detroit Lions","away_team":"Minnesota Vikings","bookmakers":[
+    {"key":"draftkings","title":"DraftKings","markets":[{"key":"h2h","outcomes":[{"name":"Detroit Lions","price":135},{"name":"Minnesota Vikings","price":-155}]}]},
+    {"key":"fanduel","title":"FanDuel","markets":[{"key":"h2h","outcomes":[{"name":"Detroit Lions","price":100},{"name":"Minnesota Vikings","price":-120}]}]},
+    {"key":"betmgm","title":"BetMGM","markets":[{"key":"h2h","outcomes":[{"name":"Detroit Lions","price":105},{"name":"Minnesota Vikings","price":-125}]}]}]},
+  {"id":"game-bal-cin","commence_time":"2026-09-13T20:25:00Z","home_team":"Baltimore Ravens","away_team":"Cincinnati Bengals","bookmakers":[
+    {"key":"draftkings","title":"DraftKings","markets":[{"key":"spreads","outcomes":[{"name":"Baltimore Ravens","price":120,"point":-2.5},{"name":"Cincinnati Bengals","price":-130,"point":2.5}]}]},
+    {"key":"fanduel","title":"FanDuel","markets":[{"key":"spreads","outcomes":[{"name":"Baltimore Ravens","price":-105,"point":-2.5},{"name":"Cincinnati Bengals","price":-105,"point":2.5}]}]},
+    {"key":"betmgm","title":"BetMGM","markets":[{"key":"spreads","outcomes":[{"name":"Baltimore Ravens","price":-110,"point":-2.5},{"name":"Cincinnati Bengals","price":100,"point":2.5}]}]}]},
+  {"id":"game-phi-dal","commence_time":"2026-09-14T00:20:00Z","home_team":"Philadelphia Eagles","away_team":"Dallas Cowboys","bookmakers":[
+    {"key":"draftkings","title":"DraftKings","markets":[{"key":"totals","outcomes":[{"name":"Over","price":125,"point":47.5},{"name":"Under","price":-135,"point":47.5}]}]},
+    {"key":"fanduel","title":"FanDuel","markets":[{"key":"totals","outcomes":[{"name":"Over","price":100,"point":47.5},{"name":"Under","price":-120,"point":47.5}]}]},
+    {"key":"betmgm","title":"BetMGM","markets":[{"key":"totals","outcomes":[{"name":"Over","price":105,"point":47.5},{"name":"Under","price":-125,"point":47.5}]}]}]}
+]

@@ -1,0 +1,6 @@
+fastapi>=0.104,<1
+uvicorn>=0.24,<1
+requests>=2.31,<3
+python-dotenv>=1,<2
+pytest>=7.4,<9
+httpx>=0.25,<1
