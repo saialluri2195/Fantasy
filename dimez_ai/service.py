@@ -4,6 +4,7 @@ from pathlib import Path
 from config import DEFAULT_FIXTURE
 from engine.normalization import normalize_odds
 from engine.recommendations import generate_parlays, rank_candidates
+from engine.pickem import generate_pickem_cards
 from ingestion.odds_source import OddsSource
 from storage.repository import Repository
 logger=logging.getLogger("parlay_assister.refresh")
@@ -19,10 +20,16 @@ class RefreshService:
             mode="fixture" if fixture else "offline" if offline else "live"
             refresh_id=self.repository.start_refresh(mode); payload, meta=self.source.fetch(fixture=fixture,offline=offline,force_refresh=force_refresh)
             records,rejected=normalize_odds(payload); candidates,shopping=rank_candidates(records); parlays=generate_parlays(candidates)
+            pickem_cards=generate_pickem_cards(records)
             if not records: raise ValueError("Refresh produced no valid normalized offers")
-            self.repository.complete_refresh(refresh_id,records,candidates,parlays,len({r['event_id'] for r in records}))
+            self.repository.complete_refresh(
+                refresh_id, records, candidates, parlays,
+                len({r['event_id'] for r in records}), line_shopping=shopping, pickem_cards=pickem_cards,
+            )
             summary={"refresh_id":refresh_id,"status":"success","games":len({r['event_id'] for r in records}),"offers":len(records),"rejected":len(rejected),
-                "candidates":len(candidates),"recommendations":len(parlays),"source_mode":meta["source_mode"],"duration":round(time.monotonic()-started,3),"line_shopping":len(shopping)}
+                "player_prop_offers":sum(r["market_type"]=="player_prop" for r in records),
+                "prop_events":meta.get("prop_events",0),"pickem_cards":len(pickem_cards),"candidates":len(candidates),"recommendations":len(parlays),
+                "source_mode":meta["source_mode"],"duration":round(time.monotonic()-started,3),"line_shopping":len(shopping)}
             logger.info("refresh complete: %s",summary); return summary
         except Exception as exc:
             if refresh_id: self.repository.fail_refresh(refresh_id,exc)

@@ -19,13 +19,15 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 ODDS_API_BASE_URL = "https://api.the-odds-api.com/v4"
 NFL_SPORT_KEY = "americanfootball_nfl"
 TARGET_SPORTSBOOKS = ("draftkings", "fanduel", "betmgm")
+DFS_OPERATORS = ("underdog", "prizepicks", "pick6")
+ALL_ODDS_OPERATORS = TARGET_SPORTSBOOKS + DFS_OPERATORS
 GAME_MARKETS = ("h2h", "spreads", "totals")
 PLAYER_PROP_MARKETS = (
-    "player_pass_yds", "player_pass_tds", "player_pass_completions",
-    "player_pass_attempts", "player_rush_yds", "player_rush_attempts",
-    "player_rush_tds", "player_reception_yds", "player_receptions",
-    "player_reception_tds", "player_kicking_points", "player_tackles_assists",
+    "player_pass_yds", "player_pass_tds", "player_rush_yds",
+    "player_reception_yds", "player_receptions", "player_rush_reception_yds",
 )
+PROP_LOOKAHEAD_DAYS = int(os.getenv("PROP_LOOKAHEAD_DAYS", "8"))
+PROP_MAX_EVENTS = int(os.getenv("PROP_MAX_EVENTS", "16"))
 MIN_EDGE_THRESHOLD = float(os.getenv("MIN_EDGE_THRESHOLD", "0.015"))
 MIN_CONSENSUS_BOOKS = int(os.getenv("MIN_CONSENSUS_BOOKS", "2"))
 STALE_AFTER_MINUTES = int(os.getenv("STALE_AFTER_MINUTES", "30"))

@@ -1,13 +1,53 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NFL Parlay Assister</title>
-<style>body{font:15px system-ui;background:#0b1220;color:#e5e7eb;margin:auto;max-width:1100px;padding:24px}h1,h2{color:#fff}.bar,.card{background:#172033;border:1px solid #29354d;border-radius:12px;padding:16px;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.muted{color:#94a3b8}.edge{color:#4ade80}button{background:#2563eb;color:white;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid #334155}.warn{background:#422006;padding:12px;border-radius:8px}</style></head>
-<body><h1>NFL Parlay Assister</h1><div class="bar"><span id="status">Loading…</span> <button onclick="refresh()">Refresh fixture data</button></div>
-<h2>Top Parlays</h2><div id="parlays" class="grid"></div><h2>Best Edges</h2><div class="card"><table><thead><tr><th>Game</th><th>Market</th><th>Selection</th><th>Book</th><th>Odds</th><th>Edge</th></tr></thead><tbody id="edges"></tbody></table></div>
-<h2>This Week's Games</h2><div id="games" class="grid"></div><h2>Line Shopping</h2><div id="shopping" class="grid"></div>
-<p class="warn">Probabilities and edges are estimates, never guarantees. Betting involves risk. Only wager where legal and if you meet your jurisdiction's minimum age.</p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NFL Parlay Assister</title>
+  <style>
+    body{font:15px system-ui;background:#0b1220;color:#e5e7eb;margin:auto;max-width:1150px;padding:24px}h1,h2{color:#fff}
+    .bar,.card,.empty{background:#172033;border:1px solid #29354d;border-radius:12px;padding:16px;margin:12px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.muted{color:#94a3b8}.edge,.live{color:#4ade80}.fixture{color:#fbbf24}
+    button{background:#2563eb;color:white;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}button:disabled{opacity:.5}
+    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid #334155}.warn{background:#422006;padding:12px;border-radius:8px}
+    .badge{border:1px solid currentColor;border-radius:99px;padding:2px 8px;font-size:12px;font-weight:700}.stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}
+  </style>
+</head>
+<body>
+  <h1>NFL Parlay Assister</h1>
+  <div class="bar"><span id="source" class="badge">LOADING</span> <span id="status">Loading data…</span>
+    <button id="refreshButton" onclick="refreshLive()">Refresh live odds</button><div id="stats" class="stats muted"></div></div>
+  <h2>Top Parlays</h2><div id="parlays" class="grid"></div>
+  <h2>Best Positive Edges</h2><div id="edgeContent" class="card"><table><thead><tr><th>Game</th><th>Market</th><th>Selection</th><th>Book</th><th>Payout multiplier</th><th>Edge</th></tr></thead><tbody id="edges"></tbody></table></div>
+  <h2>Upcoming Games</h2><div id="games" class="grid"></div>
+  <h2>Pick'em Parlay Ideas</h2><p class="muted">Same-operator cards based on favorable DFS lines versus a minimum two-sportsbook reference. These are market comparisons, not ML predictions or guaranteed positive EV.</p><div id="pickemCards" class="grid"></div>
+  <h2>Player Props & Pick'em Lines</h2><p class="muted">NFL props from Underdog Fantasy, PrizePicks, DraftKings Pick6, and available sportsbooks. DFS multipliers are indicative and can change with your selections.</p><div id="props" class="grid"></div>
+  <h2>Live Sportsbook Bets & Line Shopping</h2><p class="muted">Prices use decimal payout multipliers: a 2.50× price returns $2.50 total for every $1 wagered. ✓ marks the highest available multiplier; it is not automatically a recommendation.</p><div id="shopping" class="grid"></div>
+  <p class="warn">Probabilities and edges are estimates, never guarantees. Betting involves risk. Only wager where legal and if you meet your jurisdiction's minimum age.</p>
 <script>
-const pct=x=>(100*x).toFixed(1)+'%'; const odds=x=>x>0?'+'+x:x;
-async function load(){let [h,r,m,g]=await Promise.all(['/health','/recommendations','/markets','/games'].map(x=>fetch(x).then(y=>y.json())));status.textContent=(h.data_exists?'Last refresh: '+h.last_successful_refresh.completed_at:'No data')+(h.stale?' — STALE':'');
-parlays.innerHTML=r.recommendations.map(p=>`<div class=card><b>${p.type.replace('_',' ').toUpperCase()}</b><p>${p.legs.map(l=>`${l.player_name||l.selection} ${l.side||''} ${l.line??''} @ ${l.sportsbook} (${odds(l.american_odds)})`).join('<br>')}</p><p>Combined ${odds(p.combined_american_odds)} · Win ${pct(p.estimated_probability)} · <span class=edge>EV ${pct(p.expected_value)}</span></p><small class=muted>${p.correlation_note}</small></div>`).join('')||'<p>No qualifying parlays.</p>';
-edges.innerHTML=m.markets.map(x=>`<tr><td>${x.away_team} @ ${x.home_team}</td><td>${x.market_key}</td><td>${x.player_name||x.selection} ${x.side||''} ${x.line??''}</td><td>${x.sportsbook}</td><td>${odds(x.american_odds)}</td><td class=edge>${pct(x.edge)}</td></tr>`).join('');games.innerHTML=g.games.map(x=>`<div class=card><b>${x.away_team}</b> at <b>${x.home_team}</b><p class=muted>${x.commence_time}</p></div>`).join('');shopping.innerHTML=m.markets.map(x=>`<div class=card><b>${x.player_name||x.selection} ${x.side||''} ${x.line??''}</b><p>${Object.entries(x.other_prices).map(([book,price])=>`${book}: ${price===null?'N/A':odds(price)}${book===x.sportsbook?' ✓':''}`).join('<br>')}</p></div>`).join('')}
-async function refresh(){status.textContent='Refreshing…';let r=await fetch('/refresh',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({fixture:'data/fixtures/odds_api_nfl.json'})});if(!r.ok){status.textContent=(await r.json()).detail;return}await load()}load().catch(e=>status.textContent='API error: '+e);
+const elements={
+  source:document.getElementById('source'),status:document.getElementById('status'),stats:document.getElementById('stats'),
+  parlays:document.getElementById('parlays'),edgeContent:document.getElementById('edgeContent'),edges:document.getElementById('edges'),
+  games:document.getElementById('games'),pickemCards:document.getElementById('pickemCards'),props:document.getElementById('props'),shopping:document.getElementById('shopping'),refreshButton:document.getElementById('refreshButton')
+};
+const pct=x=>(100*x).toFixed(1)+'%';
+const americanToMultiplier=x=>x==null?'N/A':`${(x>0?1+x/100:1+100/Math.abs(x)).toFixed(2)}×`;
+const decimalMultiplier=x=>x==null?'N/A':`${Number(x).toFixed(2)}×`;
+const label=x=>`${x.player_name||x.selection} ${x.side||''} ${x.line??''}`.replace(/\b(Over|Under) \1\b/,'$1').trim();
+async function json(path,options){const response=await fetch(path,options);const body=await response.json();if(!response.ok)throw new Error(body.detail||response.statusText);return body}
+async function load(){
+  const [h,r,m,g,s,p,pc]=await Promise.all(['/health','/recommendations','/markets','/games','/line-shopping','/player-props','/pickem-cards'].map(x=>json(x)));
+  const run=h.last_successful_refresh, mode=(run?.source_mode||'none').toUpperCase(); elements.source.textContent=mode; elements.source.className=`badge ${mode==='LIVE'?'live':'fixture'}`;
+  elements.status.textContent=run?`Last successful refresh: ${new Date(run.completed_at).toLocaleString()}${h.stale?' — STALE':''}`:'No successful refresh yet';
+  elements.stats.innerHTML=run?`<span>${run.games_found} events</span><span>${run.normalized_offers} offers</span><span>${run.candidates_generated} qualifying edges</span><span>${run.recommendations_generated} parlays</span>`:'';
+  elements.parlays.innerHTML=r.recommendations.map(p=>`<div class=card><b>${p.type.replace('_',' ').toUpperCase()}</b><p>${p.legs.map(l=>`${label(l)} @ ${l.sportsbook} (${decimalMultiplier(l.decimal_odds)})`).join('<br>')}</p><p>Combined ${decimalMultiplier(p.combined_decimal_odds)} · Win ${pct(p.estimated_probability)} · <span class=edge>EV ${pct(p.expected_value)}</span></p><small class=muted>${p.correlation_note}</small></div>`).join('')||'<div class=empty>No positive-EV parlay passed the configured safeguards in this live snapshot. That is a valid result—not a data failure.</div>';
+  if(m.markets.length){elements.edges.innerHTML=m.markets.map(x=>`<tr><td>${x.away_team} @ ${x.home_team}</td><td>${x.market_key}</td><td>${label(x)}</td><td>${x.sportsbook}</td><td>${decimalMultiplier(x.decimal_odds)}</td><td class=edge>${pct(x.edge)}</td></tr>`).join('')}
+  else elements.edgeContent.innerHTML='<div class=empty>No offer cleared the configured 1.5% market-based edge threshold. The live bets below are real sportsbook lines, but the model is not labeling them positive-edge recommendations.</div>';
+  elements.games.innerHTML=g.games.sort((a,b)=>String(a.commence_time).localeCompare(String(b.commence_time))).slice(0,12).map(x=>`<div class=card><b>${x.away_team}</b> at <b>${x.home_team}</b><p class=muted>${new Date(x.commence_time).toLocaleString()}</p></div>`).join('');
+  elements.pickemCards.innerHTML=pc.cards.map(card=>`<div class=card><b>${card.operator.toUpperCase()} · ${card.leg_count}-PICK</b><p>${card.legs.map(leg=>`${leg.player_name} ${leg.side} ${leg.line} ${leg.market_key.replace('player_','').replaceAll('_',' ')}<br><small class=muted>sportsbook median ${leg.sportsbook_reference_line}; ${leg.line_advantage.toFixed(1)} line advantage</small>`).join('<br><br>')}</p><small class=muted>${card.pricing_note}</small></div>`).join('')||'<div class=empty>No same-operator pick’em card currently has enough favorable lines. More props usually appear closer to kickoff.</div>';
+  const propBooks=['underdog','prizepicks','pick6','draftkings','fanduel','betmgm'];
+  elements.props.innerHTML=p.props.slice(0,40).map(x=>`<div class=card><b>${x.player_name} — ${x.selection} ${x.line}</b><div class=muted>${x.market_key.replaceAll('_',' ')}<br>${x.away_team} at ${x.home_team} · ${new Date(x.commence_time).toLocaleString()}</div><p>${propBooks.filter(book=>x.prices[book]!=null).map(book=>`${book}: ${americanToMultiplier(x.prices[book])}${book===x.best_sportsbook?' ✓':''}`).join('<br>')}</p><small class=muted>${x.books_supporting_consensus} sportsbook consensus contributors</small></div>`).join('')||'<div class=empty>No near-term player props are posted yet. Sportsbooks and DFS operators commonly publish them closer to kickoff; use Refresh live odds later.</div>';
+  elements.shopping.innerHTML=s.comparisons.filter(x=>x.market_type!=='player_prop').slice(0,30).map(x=>`<div class=card><b>${label(x)}</b><div class=muted>${x.away_team||''} at ${x.home_team||''} · ${x.market_key}<br>${x.commence_time?new Date(x.commence_time).toLocaleString():''}</div><p>${Object.entries(x.prices).filter(([,price])=>price!=null).map(([book,price])=>`${book}: ${americanToMultiplier(price)}${book===x.best_sportsbook?' ✓':''}`).join('<br>')}</p><small class=muted>${x.books_supporting_consensus} books at this exact line · fetched ${x.retrieved_at?new Date(x.retrieved_at).toLocaleString():'recently'}</small></div>`).join('')||'<div class=empty>No comparable exact-line prices are available.</div>';
+}
+async function refreshLive(){elements.refreshButton.disabled=true;elements.status.textContent='Fetching live sportsbook odds…';try{await json('/refresh',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({force_refresh:true})});await load()}catch(error){elements.status.textContent=`Refresh failed: ${error.message}`}finally{elements.refreshButton.disabled=false}}
+load().catch(error=>elements.status.textContent=`API error: ${error.message}`);
 </script></body></html>

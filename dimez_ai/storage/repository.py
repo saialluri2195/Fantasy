@@ -11,12 +11,16 @@ class Repository:
             cur = db.execute("INSERT INTO refresh_runs(started_at,status,source_mode) VALUES(?,?,?)", (datetime.now(timezone.utc).isoformat(), "running", source_mode)); return cur.lastrowid
     def fail_refresh(self, refresh_id, error):
         with self._connect() as db: db.execute("UPDATE refresh_runs SET completed_at=?,status='failed',error=? WHERE id=?", (datetime.now(timezone.utc).isoformat(), str(error)[:2000], refresh_id))
-    def complete_refresh(self, refresh_id, records, candidates, recommendations, games):
+    def complete_refresh(self, refresh_id, records, candidates, recommendations, games, line_shopping=None, pickem_cards=None):
         now = datetime.now(timezone.utc).isoformat()
         with self._connect() as db:
             for r in records: db.execute("INSERT INTO odds_snapshots(refresh_id,event_id,market,selection,player_name,line,sportsbook,american_odds,decimal_odds,raw_implied_probability,fair_probability,retrieved_at,payload_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (refresh_id,r["event_id"],r["market_key"],r["selection"],r.get("player_name"),r.get("line"),r["sportsbook"],r["american_odds"],r["decimal_odds"],r["raw_implied_probability"],r.get("fair_probability"),r["retrieved_at"],json.dumps(r)))
             for c in candidates: db.execute("INSERT INTO candidates(refresh_id,payload_json) VALUES(?,?)", (refresh_id,json.dumps(c)))
+            for comparison in line_shopping or []:
+                db.execute("INSERT INTO line_shopping(refresh_id,payload_json) VALUES(?,?)", (refresh_id,json.dumps(comparison)))
+            for card in pickem_cards or []:
+                db.execute("INSERT INTO pickem_cards(refresh_id,payload_json) VALUES(?,?)", (refresh_id,json.dumps(card)))
             for rec in recommendations:
                 cur = db.execute("INSERT INTO recommendations(refresh_id,type,created_at,independent_probability,correlation_adjustment,estimated_probability,combined_decimal_odds,combined_american_odds,expected_value,confidence,payload_json) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                     (refresh_id,rec["type"],now,rec["independent_probability"],rec["correlation_adjustment"],rec["estimated_probability"],rec["combined_decimal_odds"],rec["combined_american_odds"],rec["expected_value"],rec["confidence"],json.dumps(rec)))
@@ -29,7 +33,7 @@ class Repository:
         with self._connect() as db:
             row = db.execute(f"SELECT * FROM refresh_runs {where} ORDER BY id DESC LIMIT 1").fetchone(); return dict(row) if row else None
     def list_json(self, table, column="payload_json", refresh_id=None):
-        allowed = {"candidates","odds_snapshots","recommendations"}; assert table in allowed
+        allowed = {"candidates","odds_snapshots","recommendations","line_shopping","pickem_cards"}; assert table in allowed
         refresh_id = refresh_id or ((self.latest_run() or {}).get("id"))
         if not refresh_id: return []
         with self._connect() as db:

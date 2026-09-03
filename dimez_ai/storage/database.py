@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS odds_snapshots(id INTEGER PRIMARY KEY, refresh_id INT
  market TEXT, selection TEXT, player_name TEXT, line REAL, sportsbook TEXT, american_odds INTEGER, decimal_odds REAL,
  raw_implied_probability REAL, fair_probability REAL, retrieved_at TEXT, payload_json TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS candidates(id INTEGER PRIMARY KEY, refresh_id INTEGER NOT NULL REFERENCES refresh_runs(id), payload_json TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS line_shopping(id INTEGER PRIMARY KEY, refresh_id INTEGER NOT NULL REFERENCES refresh_runs(id), payload_json TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS pickem_cards(id INTEGER PRIMARY KEY, refresh_id INTEGER NOT NULL REFERENCES refresh_runs(id), payload_json TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS recommendations(id INTEGER PRIMARY KEY, refresh_id INTEGER NOT NULL REFERENCES refresh_runs(id), type TEXT NOT NULL,
  created_at TEXT NOT NULL, independent_probability REAL, correlation_adjustment REAL, estimated_probability REAL, combined_decimal_odds REAL,
  combined_american_odds INTEGER, expected_value REAL, confidence TEXT, status TEXT DEFAULT 'active', payload_json TEXT NOT NULL);

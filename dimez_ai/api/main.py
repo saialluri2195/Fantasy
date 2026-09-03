@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from config import DEFAULT_FIXTURE, GEMINI_API_KEY, RESPONSIBLE_GAMBLING_NOTE, STALE_AFTER_MINUTES
+from config import DEFAULT_FIXTURE, GEMINI_API_KEY, ODDS_API_KEY, RESPONSIBLE_GAMBLING_NOTE, STALE_AFTER_MINUTES
 from service import RefreshInProgress, RefreshService
 from storage.repository import Repository
 
@@ -25,7 +25,8 @@ def index(): return FileResponse(Path(__file__).resolve().parents[1]/"app"/"inde
 def health():
     latest,last=repo.latest_run(),repo.latest_run(any_status=True)
     return {"status":"ok","database":"ok","last_successful_refresh":latest,"last_refresh_result":last,"data_exists":bool(latest),
-        "stale":stale(latest),"stale_after_minutes":STALE_AFTER_MINUTES,"gemini_configured":bool(GEMINI_API_KEY),"polymarket_configured":False}
+        "stale":stale(latest),"stale_after_minutes":STALE_AFTER_MINUTES,"odds_api_configured":bool(ODDS_API_KEY),
+        "gemini_configured":bool(GEMINI_API_KEY),"polymarket_configured":False}
 @app.get("/games")
 def games():
     rows=repo.list_json("odds_snapshots"); seen={}
@@ -38,6 +39,27 @@ def markets(event_id:str|None=None,market_type:str|None=None,sportsbook:str|None
     for key,value in filters.items():
         if value is not None: rows=[r for r in rows if str(r.get(key,"")).lower()==value.lower()]
     return {"markets":rows,"stale":stale(repo.latest_run())}
+@app.get("/line-shopping")
+def line_shopping(event_id:str|None=None,market_key:str|None=None):
+    rows=repo.list_json("line_shopping")
+    if event_id: rows=[r for r in rows if r.get("event_id")==event_id]
+    if market_key: rows=[r for r in rows if r.get("market_key")==market_key]
+    return {"comparisons":rows,"stale":stale(repo.latest_run())}
+@app.get("/player-props")
+def player_props(operator:str|None=None,event_id:str|None=None,market_key:str|None=None,player_name:str|None=None):
+    rows=[r for r in repo.list_json("line_shopping") if r.get("market_type")=="player_prop"]
+    if operator: rows=[r for r in rows if r.get("prices",{}).get(operator) is not None]
+    if event_id: rows=[r for r in rows if r.get("event_id")==event_id]
+    if market_key: rows=[r for r in rows if r.get("market_key")==market_key]
+    if player_name: rows=[r for r in rows if player_name.lower() in str(r.get("player_name","")).lower()]
+    return {"props":rows,"operators":["underdog","prizepicks","pick6"],"stale":stale(repo.latest_run())}
+@app.get("/pickem-cards")
+def pickem_cards(operator:str|None=None,card_type:str|None=None):
+    rows=repo.list_json("pickem_cards")
+    if operator: rows=[r for r in rows if r.get("operator")==operator]
+    if card_type: rows=[r for r in rows if r.get("type")==card_type]
+    return {"cards":rows,"stale":stale(repo.latest_run()),
+            "pricing_note":"DFS payouts vary with selections; cards are ranked by sportsbook line advantage, not guaranteed EV."}
 @app.get("/recommendations")
 def recommendations(category:str|None=Query(None)):
     rows=repo.list_json("recommendations")
@@ -52,6 +74,7 @@ def recommendation(recommendation_id:int):
 def refresh(request:RefreshRequest):
     try: return service.refresh(fixture=Path(request.fixture) if request.fixture else None,offline=request.offline,force_refresh=request.force_refresh)
     except RefreshInProgress as exc: raise HTTPException(409,str(exc)) from exc
-    except Exception as exc: raise HTTPException(503,f"Refresh failed; previous successful data was preserved. {exc}") from exc
+    except Exception as exc:
+        raise HTTPException(503,"Refresh failed; previous successful data was preserved. Check server logs for the error category.") from exc
 @app.get("/diagnostics")
 def diagnostics(): return {"last_successful":repo.latest_run(),"last_attempt":repo.latest_run(any_status=True),"default_fixture":str(DEFAULT_FIXTURE)}

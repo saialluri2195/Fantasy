@@ -10,3 +10,7 @@ def test_filter_rank_confidence_and_parlays():
     parlays=generate_parlays(candidates); assert {p["type"] for p in parlays}=={"best_value","safer","long_shot"}; assert all(p["expected_value"]>0 for p in parlays)
 def test_conflicts_opposite_moneylines():
     a={"candidate_key":"a","event_id":"g","market_key":"h2h","selection":"A","line":None}; b={**a,"candidate_key":"b","selection":"B"}; assert conflicts(a,b)
+
+def test_generated_parlay_uses_one_operator():
+    for parlay in generate_parlays(fixture_candidates()):
+        assert len({leg["sportsbook"] for leg in parlay["legs"]})==1
